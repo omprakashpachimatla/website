@@ -1,32 +1,27 @@
 version: 0.2
 
-env:
-  variables:
-    AWS_ACCOUNT_ID:"355039310214"
-    REPOSITORY_NAME: "website"
-    CONTAINER_NAME:"website"
-    CIUSTER_NAME:"websitecluster"
-    IMAGE_TAG: "latest"
-    AWS_DEFAULT_REGION: "ap-south-1"  
 phases:
+  install:
+    commands:
+      - echo "Installing dependencies"
+
   pre_build:
     commands:
-      - echo "Logging into Amazon ECR..."
-      - REPOSITORY_URI=355039310214.dkr.ecr.ap-south-1.amazonaws.com/website
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - echo "Logging in to ECR"
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.ap-south-1.amazonaws.com
+
   build:
     commands:
-      - echo Build started on 'date'
-      - echo "Building Docker image..."
-      - docker build -t $REPOSITORY_NAME:$IMAGE_TAG .
-      - docker tag $REPOSITORY_NAME:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+      - echo "Building Docker image"
+      - docker build -t myapp .
+      - docker tag myapp:latest <your-account-id>.dkr.ecr.ap-south-1.amazonaws.com/myapp:latest
+
   post_build:
     commands:
-      - echo Build completed on 'date'
-      - echo "Pushing Docker image..."
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo "Image pushed: $REPOSITORY_URI:$IMAGE_TAG"
-      - printf '[{"name":"%s","imageUri":"%s"}]'$CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinition.json
+      - echo "Pushing image to ECR"
+      - docker push <your-account-id>.dkr.ecr.ap-south-1.amazonaws.com/myapp:latest
+
 artifacts:
-  files:imagedefinition.json
-    
+  files:
+    - '**/*'
+     
