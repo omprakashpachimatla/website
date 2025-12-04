@@ -6,15 +6,16 @@ phases:
       - echo "Installing dependencies"
 
   pre_build:
-    commands:
-      - echo "Logging in to ECR"
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.ap-south-1.amazonaws.com
+  commands:
+    - echo "Logging in to ECR"
+    - export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+    - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com
 
   build:
     commands:
       - echo "Building Docker image"
       - docker build -t myapp .
-      - docker tag myapp:latest <your-account-id>.dkr.ecr.ap-south-1.amazonaws.com/myapp:latest
+      - docker tag myapp:latest <355039310214>.dkr.ecr.ap-south-1.amazonaws.com/myapp:latest
 
   post_build:
     commands:
